@@ -10,7 +10,6 @@ router.get('/map', c.map);
 router.get('/new', c.newForm);
 router.post(
   '/',
-  (req, res, next) => req.app.locals.upload.single('photo')(req, res, next),
   csrf,
   diaryValidation,
   c.create,
@@ -20,7 +19,6 @@ router.get('/:id/edit', validateId, c.editForm);
 router.patch(
   '/:id',
   validateId,
-  (req, res, next) => req.app.locals.upload.single('photo')(req, res, next),
   csrf,
   diaryValidation,
   c.update,

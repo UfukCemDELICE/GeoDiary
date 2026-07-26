@@ -1,8 +1,91 @@
 extends ../layout
+
 block content
-  h1 My diaries
-  if diaries.length
-    each diary in diaries
-      include ../partials/diary-card
-  else
-    p No entries yet. Choose “New entry” to create one.
+  div(class="flex-1 overflow-y-auto bg-surface px-margin-mobile md:px-margin-desktop py-8 custom-scrollbar")
+    div(class="max-w-container-max mx-auto")
+      //- Header & Filters
+      div(class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8")
+        div
+          h1(class="font-headline-lg text-headline-lg md:text-headline-xl md:font-headline-xl text-primary mb-2") Journal History
+          p(class="text-on-surface-variant font-body-md") Reflecting on #{diaries.length} #{diaries.length === 1 ? 'place' : 'places'} you've visited.
+        div(class="flex flex-wrap gap-3")
+          div(class="flex items-center gap-2 px-4 py-2 bg-surface-container-low border border-outline-variant rounded-full text-label-md font-label-md text-on-surface-variant hover:bg-surface-variant cursor-pointer transition-colors")
+            span(class="material-symbols-outlined text-[18px]") calendar_today
+            span All Time
+            span(class="material-symbols-outlined text-[18px]") expand_more
+          div(class="flex items-center gap-2 px-4 py-2 bg-surface-container-low border border-outline-variant rounded-full text-label-md font-label-md text-on-surface-variant hover:bg-surface-variant cursor-pointer transition-colors")
+            span(class="material-symbols-outlined text-[18px]") location_on
+            span All Regions
+            span(class="material-symbols-outlined text-[18px]") expand_more
+          div(class="flex items-center gap-2 px-4 py-2 bg-primary-fixed-dim text-on-primary-fixed rounded-full text-label-md font-label-md cursor-pointer transition-colors")
+            span(class="material-symbols-outlined text-[18px]") filter_list
+            span Filters
+
+      if diaries.length
+        //- Bento-ish Grid Layout
+        div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter")
+          each diary, index in diaries
+            -
+              // Deterministically choose a category badge based on location or content keywords
+              let category = "Memory";
+              let badgeColor = "bg-primary/90 text-on-primary";
+              const loc = (diary.locationName || "").toLowerCase();
+              const cont = (diary.content || "").toLowerCase();
+              const titleLower = (diary.title || "").toLowerCase();
+              if (loc.includes("nature") || loc.includes("park") || loc.includes("mountain") || loc.includes("forest") || loc.includes("beach") || cont.includes("hike") || cont.includes("tree")) {
+                category = "Nature";
+                badgeColor = "bg-primary/90 text-on-primary";
+              } else if (loc.includes("city") || loc.includes("street") || loc.includes("museum") || loc.includes("cafe") || loc.includes("restaurant") || cont.includes("coffee") || cont.includes("night")) {
+                category = "Urban";
+                badgeColor = "bg-secondary/90 text-on-secondary";
+              } else if (cont.includes("climb") || cont.includes("ascent") || cont.includes("adventure") || cont.includes("explore") || cont.includes("travel")) {
+                category = "Adventure";
+                badgeColor = "bg-tertiary-container/90 text-on-tertiary-container";
+              }
+              
+              // We also deterministically select a placeholder map photo if no photo exists
+              const mapPlaceholders = [
+                "https://lh3.googleusercontent.com/aida-public/AB6AXuBTYSj4t-wdkI-ySbj1ypMMxcTvQPFVdD9EacbsOT8CJoEHoN5-qqLkbFKa7Z11rjiEAf2tPlLOaFmQynb7Urzu99ZdXOoUQDIdbfigZaLfQmW4v5JeZHF6ruMFB5WSBwTfosjU6Ku3fDCReCszM9KJyY74ipxN-S_3DivKgH8rg3Yz3O4nqzHr6Yn1X-9I8JLaaLNnGfoPQmRhXIUgUeDyo29jFR7zsMINfajfPqHkhGqiMDga6fR1",
+                "https://lh3.googleusercontent.com/aida-public/AB6AXuBaOlnuVY-KbA4bOZZFj0PxGtJv3cO30p6C5Q3GhZ4kU9flKMg22pKgmWCmbOX_zVwMcYxB0g7CoQlbqoVfZkorjhWAryGC2xuVMV9gynsxmGA3zLNKyxmAFkgMrnjPozNYHtkU4RBEwab9QcsqXM7aAprvN31TD0WaSrMn8R3JFC4l85KFIy-kcMa2QHWVOfStlWQ7VEaUh5RV7K7KprfxMmkAVIw6IVMH0t96fnowUIn7PRNuwBYy",
+                "https://lh3.googleusercontent.com/aida-public/AB6AXuAjoAVN3zk_MGRc97ZPNiRZbR8AdX7omNhMLmgbB8kshTirSN-fLK8R5p3nqQncoiZFDmR3PJa7S6pRVqZCN3b1Rj9gAPX9rEYvSVDyZIElcVLaGLzLllSZY38zQgOe39vIbhCOrmjH4QdCoZBSuY-c29Bh90YXr5MXwI2z_RohVqzA0k65hF5U5hQXyLN6CSeJeP-h7gBoeFSFTHWVsF5b3thUJt_3nbCGvsrkubIlUmAzxXpUT8ql"
+              ];
+              const photoUrl = diary.photo ? diary.photo.url : mapPlaceholders[index % mapPlaceholders.length];
+
+            article(class="journal-card group relative bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.05)] flex flex-col border border-outline-variant/30 hover-lift")
+              div(class="h-48 overflow-hidden relative")
+                img(class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src=photoUrl alt=diary.title)
+                div(class="absolute top-4 left-4")
+                  span(class=`${badgeColor} backdrop-blur-md px-3 py-1 rounded-full text-label-sm font-label-sm`)= category
+              div(class="p-6 flex flex-col flex-1 bg-surface-container-lowest")
+                div(class="flex justify-between items-start mb-3")
+                  div
+                    h3(class="font-headline-md text-headline-md text-on-surface mb-1 hover:text-primary transition-colors font-semibold")
+                      a(href=`/diaries/${diary._id}`)= diary.title
+                    if diary.locationName
+                      p(class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1")
+                        span(class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;") location_on
+                        span= diary.locationName
+                  span(class="text-label-sm font-label-sm text-outline whitespace-nowrap")= new Date(diary.diaryDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})
+                p(class="font-body-md text-body-md text-on-surface-variant line-clamp-3 mb-6")= diary.content
+                div(class="mt-auto flex items-center justify-between")
+                  a(href=`/diaries/${diary._id}` class="text-primary font-label-md text-label-md flex items-center gap-1 hover:gap-2 transition-all font-semibold") Read Entry
+                    span(class="material-symbols-outlined text-[18px]") arrow_forward
+      else
+        div(class="flex flex-col items-center justify-center py-20 text-center")
+          div(class="mb-6 flex items-center justify-center w-16 h-16 bg-primary-container/10 text-primary rounded-full")
+            span(class="material-symbols-outlined !text-3xl") auto_stories
+          h2(class="font-headline-md text-headline-md text-on-surface mb-2") No entries yet
+          p(class="font-body-md text-on-surface-variant max-w-[280px] mb-8") Start capturing your journey by recording your first diary entry.
+          a(href="/diaries/new" class="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity active:scale-95 flex items-center gap-2")
+            span(class="material-symbols-outlined") add
+            span Create Entry
+
+block scripts
+  style.
+    .journal-card {
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .journal-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0px 12px 24px rgba(0,0,0,0.08);
+    }

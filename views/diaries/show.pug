@@ -1,13 +1,67 @@
 extends ../layout
+
+block head
+  link(rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css')
+
 block content
-  h1= diary.title
-  time(datetime=diary.diaryDate.toISOString())= diary.diaryDate.toLocaleDateString()
-  p= diary.content
-  if diary.locationName
-    p Location: #{diary.locationName}
-  if diary.photo
-    img.diary-photo(src=diary.photo.url alt=`Photograph for ${diary.title}`)
-  a(href=`/diaries/${diary._id}/edit`) Edit
-  form(action=`/diaries/${diary._id}?_method=DELETE` method='post')
-    input(type='hidden' name='_csrf' value=csrfToken)
-    button(type='submit') Delete
+  div(class="flex-1 flex flex-col md:flex-row h-full w-full overflow-hidden bg-surface")
+    //- Left Column: Diary Content Card
+    div(class="flex-1 p-6 md:p-12 overflow-y-auto custom-scrollbar flex justify-center items-start h-full")
+      article(class="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-8 md:p-10 shadow-lg hover:shadow-xl transition-all duration-300 w-full max-w-2xl flex flex-col gap-6")
+        
+        if diary.photo
+          div(class="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-inner bg-surface-variant")
+            img(class="w-full h-full object-cover" src=diary.photo.url alt=`Photograph for ${diary.title}`)
+        
+        div(class="space-y-4")
+          div(class="flex justify-between items-start gap-4 flex-wrap")
+            div
+              h1(class="font-headline-lg text-headline-lg md:text-headline-xl text-primary font-bold tracking-tight")= diary.title
+              if diary.locationName
+                p(class="text-label-md font-semibold text-primary/80 flex items-center gap-1 mt-1")
+                  span(class="material-symbols-outlined text-[18px]") location_on
+                  span= diary.locationName
+            div(class="text-right")
+              time(class="text-label-md font-bold text-outline" datetime=diary.diaryDate.toISOString())= new Date(diary.diaryDate).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})
+          
+          hr(class="border-outline-variant/30")
+          
+          p(class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed font-normal whitespace-pre-wrap font-serif")= diary.content
+        
+        hr(class="border-outline-variant/30 mt-4")
+        
+        div(class="flex flex-wrap gap-4 items-center justify-between")
+          a(href=`/diaries/${diary._id}/edit` class="flex items-center justify-center gap-2 px-6 py-3 bg-secondary-container text-on-secondary-container hover:bg-secondary-container/80 font-bold rounded-xl transition-all active:scale-95 text-label-md")
+            span(class="material-symbols-outlined text-sm") edit
+            span Edit Story
+          
+          form(action=`/diaries/${diary._id}?_method=DELETE` method='post' class="m-0" onsubmit="return confirm('Are you sure you want to delete this memory?');")
+            input(type='hidden' name='_csrf' value=csrfToken)
+            button(type='submit' class="flex items-center justify-center gap-2 px-6 py-3 bg-error-container text-on-error-container hover:bg-error-container/80 font-bold rounded-xl transition-all active:scale-95 text-label-md")
+              span(class="material-symbols-outlined text-sm") delete
+              span Delete Memory
+
+    //- Right Column: Location Map View
+    div(class="w-full md:w-[400px] h-[30vh] md:h-full border-t md:border-t-0 md:border-l border-outline-variant relative bg-surface-variant")
+      div(id="show-map" class="absolute inset-0 z-0 h-full w-full" data-mapbox-token=mapboxToken data-coordinates=JSON.stringify(diary.location.coordinates))
+      div(class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-md border border-outline-variant/30 px-4 py-2.5 rounded-xl shadow-md pointer-events-none")
+        p(class="text-[12px] text-primary font-semibold flex items-center gap-1.5")
+          span(class="material-symbols-outlined text-[16px]") explore
+          span Entry Location
+
+block scripts
+  script(src='https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js')
+  script.
+    (() => {
+      const el = document.querySelector('#show-map');
+      if (!el || !el.dataset.mapboxToken) return;
+      mapboxgl.accessToken = el.dataset.mapboxToken;
+      const coords = JSON.parse(el.dataset.coordinates);
+      const map = new mapboxgl.Map({
+        container: el,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: coords,
+        zoom: 12,
+      });
+      new mapboxgl.Marker().setLngLat(coords).addTo(map);
+    })();

@@ -6,8 +6,14 @@ module.exports = [
   {
     files: ['**/*.js'],
     languageOptions: { ecmaVersion: 2022, sourceType: 'commonjs', globals: { ...globals.node } },
+    rules: {
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    },
   },
-  { files: ['public/js/**/*.js'], languageOptions: { globals: { ...globals.browser } } },
+  {
+    files: ['public/js/**/*.js'],
+    languageOptions: { globals: { ...globals.browser, mapboxgl: 'readonly' } },
+  },
   {
     files: ['tests/**/*.js'],
     languageOptions: { globals: { ...globals.node, ...globals.vitest } },

@@ -9,4 +9,5 @@ router.get(
   controller.callback,
 );
 router.post('/logout', requireAuth, controller.logout);
+router.get('/guest', controller.guestLogin);
 module.exports = router;

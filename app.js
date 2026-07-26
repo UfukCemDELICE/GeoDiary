@@ -23,9 +23,26 @@ function createApp(config = readEnvironment({ requireExternal: true })) {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: ["'self'", 'https://api.mapbox.com'],
-          styleSrc: ["'self'", "'unsafe-inline'", 'https://api.mapbox.com'],
-          imgSrc: ["'self'", 'data:', 'blob:', 'https://*.mapbox.com'],
+          scriptSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            'https://api.mapbox.com',
+            'https://cdn.tailwindcss.com',
+          ],
+          styleSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            'https://api.mapbox.com',
+            'https://fonts.googleapis.com',
+          ],
+          fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+          imgSrc: [
+            "'self'",
+            'data:',
+            'blob:',
+            'https://*.mapbox.com',
+            'https://lh3.googleusercontent.com',
+          ],
           connectSrc: ["'self'", 'https://api.mapbox.com', 'https://events.mapbox.com'],
           workerSrc: ["'self'", 'blob:'],
           childSrc: ['blob:'],

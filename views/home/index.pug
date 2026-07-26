@@ -1,6 +1,78 @@
 extends ../layout
 block content
-  h1 GeoDiary
-  p Record meaningful places and memories. Sign in to begin.
-  if !currentUser
-    a.button(href='/auth/google') Continue with Google
+  //- Subtle Map Background Illustration
+  div(class="fixed inset-0 pointer-events-none z-0")
+    div(class="absolute inset-0 map-watermark" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBuGlAQ17tUXLWrJGFgCXt6Wvr59yVXUQOA4KzKe3lKosUr7IeOBvpTFrFIPXxzHA9aCd2H27BOYkPsuReVrdWoTI5qPm7IwpP10m23afx1lrwLKgtMaP_ud_cR_jLdurs7bPmDIkrFPMv7YA-SWTK-21dSyHo37wio1wONsAQaLpwS7Lth_qZVccjPBCtU6y45iM5uxgp65EybLjel24JyFkrXyDq_wfQo0J-Y_07gSIBOCd2j7yoO')")
+    div(class="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary opacity-[0.03] blur-[120px] rounded-full")
+    div(class="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-tertiary opacity-[0.03] blur-[100px] rounded-full")
+  
+  //- Main Content Container
+  main(class="relative z-10 w-full max-w-md px-margin-mobile flex flex-col items-center")
+    //- Brand Identity Section
+    div(class="mb-12 flex flex-col items-center text-center animate-fade-in")
+      div(class="mb-6 flex items-center justify-center w-16 h-16 bg-primary-container text-on-primary-container rounded-2xl shadow-lg shadow-primary/10")
+        span(class="material-symbols-outlined !text-4xl" style="font-variation-settings: 'FILL' 1;") explore
+      h1(class="font-headline-xl text-headline-xl text-primary tracking-tight mb-2") GeoDiary
+      p(class="font-body-lg text-body-lg text-on-surface-variant max-w-[280px]") Capture your journey, one coordinate at a time.
+    
+    //- Authentication Card
+    div(class="w-full bg-surface-container-lowest border border-outline-variant rounded-3xl p-10 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-500 auth-card")
+      div(class="mb-8 text-center")
+        h2(class="font-headline-md text-headline-md text-on-surface mb-2") Welcome Back
+        p(class="font-label-md text-label-md text-on-surface-variant") Sign in to sync your memories
+      
+      //- Google Sign In Button
+      a(href="/auth/google" class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-surface border border-outline-variant rounded-xl hover:bg-surface-container-low transition-all duration-200 group active:scale-95")
+        svg(class="w-6 h-6" viewBox="0 0 48 48")
+          path(d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" fill="#EA4335")
+          path(d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" fill="#4285F4")
+          path(d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" fill="#FBBC05")
+          path(d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" fill="#34A853")
+          path(d="M0 0h48v48H0z" fill="none")
+        span(class="font-label-md text-label-md text-on-surface font-semibold") Sign in with Google
+      
+      div(class="relative my-8")
+        div(class="absolute inset-0 flex items-center")
+          span(class="w-full border-t border-outline-variant")
+        div(class="relative flex justify-center text-xs uppercase")
+          span(class="bg-surface-container-lowest px-4 font-label-sm text-label-sm text-outline tracking-widest uppercase") Or exploration guest
+      
+      a(href="/auth/guest" class="w-full flex items-center justify-center gap-2 px-6 py-4 text-primary font-label-md text-label-md rounded-xl hover:bg-primary/5 transition-colors group") Continue as Guest
+        span(class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform") arrow_forward
+    
+    //- Footer Links
+    footer(class="mt-12 flex gap-gutter text-on-surface-variant")
+      a(class="font-label-sm text-label-sm hover:text-primary transition-colors" href="#") Privacy Policy
+      span(class="w-1 h-1 rounded-full bg-outline-variant self-center")
+      a(class="font-label-sm text-label-sm hover:text-primary transition-colors" href="#") Terms of Service
+      span(class="w-1 h-1 rounded-full bg-outline-variant self-center")
+      a(class="font-label-sm text-label-sm hover:text-primary transition-colors" href="#") Support
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+        const card = document.querySelector('.auth-card');
+        
+        // Subtle tilt effect on mouse move
+        document.addEventListener('mousemove', (e) => {
+            if (window.innerWidth < 768) return;
+            
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 50;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 50;
+            
+            card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+
+        // Reset transform when mouse leaves
+        document.addEventListener('mouseleave', () => {
+            card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+        });
+    });
+  style.
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fade-in 0.8s ease-out forwards;
+    }

@@ -1,6 +1,5 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const { vi } = require('vitest');
 const Diary = require('../../models/Diary');
 const { createApp } = require('../../app');
 const app = createApp();

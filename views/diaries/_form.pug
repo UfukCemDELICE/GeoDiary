@@ -1,19 +1,87 @@
-include ../partials/form-errors
-form(method='post' action=action enctype='multipart/form-data')
-  input(type='hidden' name='_csrf' value=csrfToken)
-  if method
-    input(type='hidden' name='_method' value=method)
-  label Title
-    input(name='title' maxlength='120' required value=diary.title || '')
-  label Date
-    input(type='date' name='diaryDate' required value=diary.diaryDate ? new Date(diary.diaryDate).toISOString().slice(0,10) : '')
-  label Content
-    textarea(name='content' maxlength='5000' required)= diary.content || ''
-  label Location name
-    input(name='locationName' value=diary.locationName || '')
-  input#longitude(type='hidden' name='longitude' value=diary.location ? diary.location.coordinates[0] : diary.longitude || '')
-  input#latitude(type='hidden' name='latitude' value=diary.location ? diary.location.coordinates[1] : diary.latitude || '')
-  #form-map.map(data-mapbox-token=mapboxToken)
-  label Optional photo
-    input(type='file' name='photo' accept='image/jpeg,image/png,image/webp')
-  button(type='submit') Save diary
+style.
+  #form-page-root {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    overflow: hidden;
+  }
+  #form-map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .mapboxgl-ctrl-bottom-right { right: 420px; }
+
+div(id="form-page-root")
+  //- Map fills entire background
+  div(id="form-map" data-mapbox-token=mapboxToken)
+    //- Map hint badge
+  div(class="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur-md border border-outline-variant/30 px-4 py-2.5 rounded-xl shadow-md pointer-events-none")
+    p(class="text-[12px] text-primary font-semibold flex items-center gap-1.5")
+      span(class="material-symbols-outlined text-[16px]") pin_drop
+      span Click the map to pin your location
+
+  //- Right form panel (fixed width, full height, scrollable)
+  form(method='post' action=action
+    class="absolute right-0 top-0 bottom-0 w-[400px] bg-surface-container-lowest/95 backdrop-blur-md border-l border-outline-variant flex flex-col z-10 shadow-2xl")
+    input(type='hidden' name='_csrf' value=csrfToken)
+    if method
+      input(type='hidden' name='_method' value=method)
+    input#longitude(type='hidden' name='longitude' value=diary.location ? diary.location.coordinates[0] : diary.longitude || '')
+    input#latitude(type='hidden' name='latitude' value=diary.location ? diary.location.coordinates[1] : diary.latitude || '')
+
+    //- Panel header
+    div(class="px-6 pt-5 pb-4 border-b border-outline-variant shrink-0 flex items-center justify-between")
+      h2(class="font-headline-md text-headline-md text-on-surface font-bold")= title
+      a(href="/diaries" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant")
+        span(class="material-symbols-outlined text-[20px]") close
+
+    //- Scrollable fields
+    div(class="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 flex flex-col gap-4")
+      include ../partials/form-errors
+
+      //- Title
+      div(class="space-y-1")
+        label(class="font-label-sm text-label-sm text-on-surface-variant px-1 block") Title
+        div(class="flex items-center gap-2 bg-surface-container-low px-4 py-3 rounded-xl border border-transparent focus-within:border-primary transition-all")
+          span(class="material-symbols-outlined text-on-surface-variant text-[18px]") title
+          input(class="bg-transparent border-none p-0 focus:ring-0 w-full font-label-md text-label-md text-on-surface placeholder:text-on-surface-variant/40"
+            placeholder="Give this memory a title..." type="text" name="title" maxlength="120" required value=diary.title || "")
+
+      //- Location name
+      div(class="space-y-1")
+        label(class="font-label-sm text-label-sm text-on-surface-variant px-1 block") Location Name
+        div(class="flex items-center gap-2 bg-surface-container-low px-4 py-3 rounded-xl border border-transparent focus-within:border-primary transition-all")
+          span(class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings: 'FILL' 1;") location_on
+          input(class="bg-transparent border-none p-0 focus:ring-0 w-full font-label-md text-label-md text-on-surface placeholder:text-on-surface-variant/40"
+            placeholder="Where are you?" type="text" name="locationName" value=diary.locationName || "")
+
+      //- Coordinate status badge
+      div#coord-status(class=`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-semibold transition-all ${(diary.location || diary.longitude) ? 'bg-primary/10 text-primary' : 'bg-error-container/40 text-error border border-error/20'}`)
+        span(class="material-symbols-outlined text-[16px]")= (diary.location || diary.longitude) ? 'check_circle' : 'warning'
+        span#coord-text= (diary.location || diary.longitude) ? `Pin set at (${diary.location ? diary.location.coordinates[0].toFixed(4) : diary.longitude}, ${diary.location ? diary.location.coordinates[1].toFixed(4) : diary.latitude})` : 'Click the map to set a location pin'
+
+      //- Date
+      div(class="space-y-1")
+        label(class="font-label-sm text-label-sm text-on-surface-variant px-1 block") Date
+        div(class="flex items-center gap-2 bg-surface-container-low px-4 py-3 rounded-xl border border-transparent focus-within:border-primary transition-all")
+          span(class="material-symbols-outlined text-on-surface-variant text-[18px]") calendar_today
+          input(class="bg-transparent border-none p-0 focus:ring-0 w-full font-label-md text-label-md text-on-surface"
+            type="date" name="diaryDate" required value=diary.diaryDate ? new Date(diary.diaryDate).toISOString().slice(0,10) : "")
+
+      //- Story
+      div(class="space-y-1")
+        label(class="font-label-sm text-label-sm text-on-surface-variant px-1 block") Your Story
+        textarea(class="w-full min-h-[140px] bg-surface-container-low border border-transparent focus:border-primary focus:ring-0 rounded-xl p-4 font-body-md text-body-md text-on-surface resize-none leading-relaxed"
+          placeholder="Write down your memories here..." name="content" maxlength="5000" required)= diary.content || ""
+
+
+    //- Submit footer
+    div(class="px-6 py-4 border-t border-outline-variant shrink-0")
+      button(type="submit" class="w-full py-3.5 bg-primary text-on-primary font-bold rounded-xl shadow-lg hover:shadow-xl active:scale-95 transition-all font-label-md text-label-md flex items-center justify-center gap-2")
+        span(class="material-symbols-outlined text-[18px]") save
+        span Save Entry

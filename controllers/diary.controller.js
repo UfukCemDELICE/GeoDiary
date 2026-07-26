@@ -1,5 +1,5 @@
 const Diary = require('../models/Diary');
-const { metadataFromUpload } = require('../services/image.service');
+const { metadataFromUpload, removeLocalImage } = require('../services/image.service');
 function notFound() {
   const error = new Error('Diary not found');
   error.status = 404;
@@ -15,13 +15,19 @@ async function index(req, res, next) {
 }
 async function map(req, res, next) {
   try {
-    const rows = await Diary.find({ user: req.user._id }).select('title diaryDate location').lean();
-    const markers = rows.map((d) => ({
-      id: String(d._id),
-      title: d.title,
-      diaryDate: d.diaryDate,
-      coordinates: d.location.coordinates,
-    }));
+    const rows = await Diary.find({ user: req.user._id })
+      .select('title diaryDate location locationName content')
+      .lean();
+    const markers = rows
+      .filter((d) => d.location && d.location.coordinates)
+      .map((d) => ({
+        id: String(d._id),
+        title: d.title,
+        diaryDate: d.diaryDate,
+        locationName: d.locationName || '',
+        content: d.content || '',
+        coordinates: d.location.coordinates,
+      }));
     res.render('diaries/map', {
       title: 'Diary map',
       markers,
@@ -40,13 +46,19 @@ function newForm(req, res) {
   });
 }
 async function create(req, res, next) {
-  if (req.validationErrors.length)
+  if (req.validationErrors.length) {
+    if (req.file) {
+      await removeLocalImage(req.file.filename, req.app.locals.config.uploadDirectory).catch(
+        () => {},
+      );
+    }
     return res.status(422).render('diaries/new', {
       title: 'New diary',
       diary: req.body,
       errors: req.validationErrors,
       mapboxToken: req.app.locals.config.mapboxToken,
     });
+  }
   try {
     const diary = await Diary.create({
       user: req.user._id,
@@ -59,6 +71,11 @@ async function create(req, res, next) {
     });
     return res.redirect(`/diaries/${diary.id}`);
   } catch (e) {
+    if (req.file) {
+      await removeLocalImage(req.file.filename, req.app.locals.config.uploadDirectory).catch(
+        () => {},
+      );
+    }
     return next(e);
   }
 }
@@ -89,28 +106,56 @@ async function editForm(req, res, next) {
   }
 }
 async function update(req, res, next) {
-  if (req.validationErrors.length)
+  if (req.validationErrors.length) {
+    if (req.file) {
+      await removeLocalImage(req.file.filename, req.app.locals.config.uploadDirectory).catch(
+        () => {},
+      );
+    }
     return res.status(422).render('diaries/edit', {
       title: 'Edit diary',
       diary: { ...req.body, _id: req.params.id },
       errors: req.validationErrors,
       mapboxToken: req.app.locals.config.mapboxToken,
     });
+  }
   try {
+    const oldDiary = await Diary.findOne({ _id: req.params.id, user: req.user._id });
+    if (!oldDiary) throw notFound();
+
+    const updates = {
+      title: req.body.title,
+      content: req.body.content,
+      diaryDate: req.body.diaryDate,
+      locationName: req.body.locationName,
+      location: { type: 'Point', coordinates: [req.body.longitude, req.body.latitude] },
+    };
+
+    if (req.file) {
+      updates.photo = metadataFromUpload(req.file);
+    }
+
     const diary = await Diary.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
-      {
-        title: req.body.title,
-        content: req.body.content,
-        diaryDate: req.body.diaryDate,
-        locationName: req.body.locationName,
-        location: { type: 'Point', coordinates: [req.body.longitude, req.body.latitude] },
-      },
+      updates,
       { new: true, runValidators: true },
     );
     if (!diary) throw notFound();
+
+    if (req.file && oldDiary.photo && oldDiary.photo.storageKey) {
+      await removeLocalImage(
+        oldDiary.photo.storageKey,
+        req.app.locals.config.uploadDirectory,
+      ).catch(() => {});
+    }
+
     res.redirect(`/diaries/${diary.id}`);
   } catch (e) {
+    if (req.file) {
+      await removeLocalImage(req.file.filename, req.app.locals.config.uploadDirectory).catch(
+        () => {},
+      );
+    }
     next(e);
   }
 }
@@ -118,9 +163,12 @@ async function remove(req, res, next) {
   try {
     const diary = await Diary.findOneAndDelete({ _id: req.params.id, user: req.user._id });
     if (!diary) throw notFound();
-    /* TODO(INTERN): FR-005 — Remove replaced/deleted images via SDD section 9. */ res.redirect(
-      '/diaries',
-    );
+    if (diary.photo && diary.photo.storageKey) {
+      await removeLocalImage(diary.photo.storageKey, req.app.locals.config.uploadDirectory).catch(
+        () => {},
+      );
+    }
+    res.redirect('/diaries');
   } catch (e) {
     next(e);
   }

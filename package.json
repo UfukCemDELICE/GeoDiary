@@ -5,7 +5,7 @@
   "description": "Educational location diary MVC starter",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "nodemon --ext js,pug server.js",
     "start": "node server.js",
     "test": "vitest run",
     "test:watch": "vitest",

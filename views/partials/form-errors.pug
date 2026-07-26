@@ -1,6 +1,8 @@
 if errors && errors.length
-  section.errors(role='alert')
-    h2 Please correct these fields
-    ul
+  div(class="bg-error-container text-on-error-container p-4 rounded-xl border border-error/20 mb-4 text-sm w-full" role="alert")
+    h3(class="font-bold flex items-center gap-1.5 mb-1 text-[13px] text-error")
+      span(class="material-symbols-outlined text-[18px]") error
+      span Please correct these errors:
+    ul(class="list-disc list-inside space-y-0.5 text-xs text-on-secondary-container")
       each error in errors
         li= error.msg
