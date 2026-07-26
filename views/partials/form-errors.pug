@@ -1,0 +1,6 @@
+if errors && errors.length
+  section.errors(role='alert')
+    h2 Please correct these fields
+    ul
+      each error in errors
+        li= error.msg

@@ -1,0 +1,9 @@
+extends ../layout
+block head
+  link(rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css')
+block content
+  h1 Diary map
+  #diary-map.map(data-mapbox-token=mapboxToken data-markers=JSON.stringify(markers))
+block scripts
+  script(src='https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js')
+  script(src='/js/diary-list-map.js')

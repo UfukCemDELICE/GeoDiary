@@ -1,0 +1,8 @@
+extends ../layout
+block content
+  h1 My diaries
+  if diaries.length
+    each diary in diaries
+      include ../partials/diary-card
+  else
+    p No entries yet. Choose “New entry” to create one.

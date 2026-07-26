@@ -1,0 +1,6 @@
+extends ../layout
+block content
+  h1 GeoDiary
+  p Record meaningful places and memories. Sign in to begin.
+  if !currentUser
+    a.button(href='/auth/google') Continue with Google

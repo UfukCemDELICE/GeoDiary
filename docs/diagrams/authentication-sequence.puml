@@ -1,0 +1,15 @@
+@startuml
+actor User
+participant GeoDiary
+participant "Google OAuth" as Google
+participant "User model" as UserModel
+database "MongoDB/session store" as DB
+User -> GeoDiary : GET /auth/google
+GeoDiary -> Google : authorize
+Google --> GeoDiary : callback + profile
+GeoDiary -> UserModel : lookup/upsert googleId
+UserModel -> DB : findOneAndUpdate
+DB --> UserModel : user
+GeoDiary -> DB : session with user ID
+GeoDiary --> User : redirect /diaries
+@enduml

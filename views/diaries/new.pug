@@ -1,0 +1,11 @@
+extends ../layout
+block head
+  link(rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css')
+block content
+  h1 New diary
+  - const action = '/diaries'
+  - const method = null
+  include _form
+block scripts
+  script(src='https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js')
+  script(src='/js/diary-form-map.js')

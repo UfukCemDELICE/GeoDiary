@@ -1,0 +1,11 @@
+nav
+  a(href='/') GeoDiary
+  if currentUser
+    a(href='/diaries') List
+    a(href='/diaries/map') Map
+    a(href='/diaries/new') New entry
+    form(action='/auth/logout' method='post')
+      input(type='hidden' name='_csrf' value=csrfToken)
+      button(type='submit') Log out
+  else
+    a(href='/auth/google') Sign in with Google

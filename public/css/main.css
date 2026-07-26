@@ -1,0 +1,57 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #18212b;
+  background: #f7f8fa;
+}
+body {
+  margin: 0;
+}
+nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  background: #183d3d;
+}
+nav a,
+nav button {
+  color: white;
+}
+nav form {
+  margin-left: auto;
+}
+.container {
+  max-width: 54rem;
+  margin: auto;
+  padding: 2rem 1rem;
+}
+label {
+  display: grid;
+  gap: 0.3rem;
+  margin: 1rem 0;
+}
+input,
+textarea,
+button {
+  font: inherit;
+  padding: 0.6rem;
+}
+textarea {
+  min-height: 10rem;
+}
+.map {
+  min-height: 24rem;
+  border: 1px solid #aaa;
+}
+.card {
+  background: white;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+.errors {
+  border-left: 0.3rem solid #b42318;
+  padding-left: 1rem;
+}
+.diary-photo {
+  max-width: 100%;
+}

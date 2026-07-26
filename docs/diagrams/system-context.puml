@@ -1,0 +1,14 @@
+@startuml
+actor User
+rectangle GeoDiary
+cloud "Google OAuth" as Google
+cloud Mapbox
+cloud "MongoDB Atlas" as Mongo
+cloud "Image storage" as Images
+User --> GeoDiary : private diary UI
+GeoDiary --> Google : authenticate
+GeoDiary --> Mongo : profiles, sessions, diaries
+GeoDiary --> Images : image bytes
+GeoDiary --> Mapbox : map resources
+User --> Mapbox : browser tiles
+@enduml
