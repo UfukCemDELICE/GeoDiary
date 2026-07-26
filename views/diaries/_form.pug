@@ -1,0 +1,19 @@
+include ../partials/form-errors
+form(method='post' action=action enctype='multipart/form-data')
+  input(type='hidden' name='_csrf' value=csrfToken)
+  if method
+    input(type='hidden' name='_method' value=method)
+  label Title
+    input(name='title' maxlength='120' required value=diary.title || '')
+  label Date
+    input(type='date' name='diaryDate' required value=diary.diaryDate ? new Date(diary.diaryDate).toISOString().slice(0,10) : '')
+  label Content
+    textarea(name='content' maxlength='5000' required)= diary.content || ''
+  label Location name
+    input(name='locationName' value=diary.locationName || '')
+  input#longitude(type='hidden' name='longitude' value=diary.location ? diary.location.coordinates[0] : diary.longitude || '')
+  input#latitude(type='hidden' name='latitude' value=diary.location ? diary.location.coordinates[1] : diary.latitude || '')
+  #form-map.map(data-mapbox-token=mapboxToken)
+  label Optional photo
+    input(type='file' name='photo' accept='image/jpeg,image/png,image/webp')
+  button(type='submit') Save diary

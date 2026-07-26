@@ -1,0 +1,23 @@
+@startuml
+actor User
+participant "Diary form" as Form
+participant Mapbox
+participant "Express route" as Route
+participant "Validation middleware" as Validation
+participant Controller
+participant "Image service" as Image
+participant "Diary model" as Diary
+database MongoDB
+User -> Form : enter memory
+Form -> Mapbox : click location
+Mapbox --> Form : longitude, latitude
+Form -> Route : POST multipart
+Route -> Validation : authenticate/CSRF/fields/upload
+Validation -> Controller : validated request
+opt photograph
+Controller -> Image : metadata
+end
+Controller -> Diary : create with session owner
+Diary -> MongoDB : insert
+Controller --> User : redirect detail
+@enduml

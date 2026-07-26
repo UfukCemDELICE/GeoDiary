@@ -1,0 +1,13 @@
+@startuml
+node Browser
+node "Node.js / Express application" as App
+database "MongoDB Atlas" as DB
+cloud "Google OAuth" as Google
+cloud Mapbox
+cloud "Durable object storage" as Storage
+Browser --> App : HTTPS
+Browser --> Mapbox : HTTPS tiles/styles
+App --> DB : TLS
+App --> Google : OAuth HTTPS
+App --> Storage : HTTPS API
+@enduml

@@ -1,0 +1,4 @@
+article.card
+  h2: a(href=`/diaries/${diary._id}`)= diary.title
+  time(datetime=diary.diaryDate.toISOString())= diary.diaryDate.toLocaleDateString()
+  p= diary.content
