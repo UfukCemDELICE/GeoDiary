@@ -1,8 +1,21 @@
 @startuml
+
 actor User
+
 node Browser
-node "Express application" { component Routes; component Middleware; component Controllers; component "Pug views" as Pug; component Passport; component Services; component Mongoose }
+
+node "Express application" {
+    component Routes
+    component Middleware
+    component Controllers
+    component "Pug views" as Pug
+    component Passport
+    component Services
+    component Mongoose
+}
+
 database "MongoDB Atlas" as DB
+
 User --> Browser
 Browser --> Routes
 Routes --> Middleware
@@ -13,4 +26,5 @@ Controllers --> Mongoose
 Controllers --> Pug
 Mongoose --> DB
 Pug --> Browser : HTML
+
 @enduml

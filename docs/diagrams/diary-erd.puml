@@ -1,18 +1,28 @@
 @startuml
-entity User { * _id : ObjectId
-* googleId : string <<unique>>
-displayName : string
-email : string
-avatarUrl : string
-timestamps }
-entity Diary { * _id : ObjectId
-* user : ObjectId <<FK>>
-* title : string
-* content : string
-* diaryDate : date
-* location : GeoJSON Point
-locationName : string
-photo : metadata
-timestamps }
+
+entity User {
+    * _id : ObjectId
+    * googleId : string <<unique>>
+    --
+    displayName : string
+    email : string
+    avatarUrl : string
+    timestamps
+}
+
+entity Diary {
+    * _id : ObjectId
+    * user : ObjectId <<FK>>
+    --
+    title : string
+    content : string
+    diaryDate : date
+    location : GeoJSON Point
+    locationName : string
+    photo : metadata
+    timestamps
+}
+
 User ||--o{ Diary : owns
+
 @enduml
